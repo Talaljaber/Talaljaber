@@ -13,7 +13,7 @@ Founder & CTO of [DineLink](https://dinelink.org) · Software Engineer at [Activ
 ---
 
 - 🏆 **Won Falling Walls Lab Jordan 2025** with DineLink, then pitched at the Global Finals in Berlin as one of the Top 100 innovators picked from 2,750+ applicants. I was the youngest finalist there.
-- ⚙️ **At Activepieces** I've merged **<!-- AP_MERGED:START -->41<!-- AP_MERGED:END --> pull requests** that redesign the step forms of **<!-- AP_PIECES:START -->41<!-- AP_PIECES:END --> integrations**, including Gmail, Slack, HubSpot, Google Sheets, Notion, OpenAI and Claude.
+- ⚙️ **At Activepieces** I've merged **<!-- AP_MERGED:START -->125<!-- AP_MERGED:END --> pull requests** that redesign the step forms of **<!-- AP_PIECES:START -->88<!-- AP_PIECES:END --> integrations**, including Gmail, Slack, HubSpot, Google Sheets, Notion, OpenAI and Claude.
 - 🛡️ **I maintain [VibeSafe](https://github.com/Talaljaber/Vibesafe)**, an open-source scanner that catches leaked secrets and unsafe config in AI-built apps before they ship.
 - 📄 **I co-authored HydroSense**, research on low-cost leak detection with AI and IoT that was accepted to ICFT 2026.
 
@@ -46,12 +46,12 @@ Founder & CTO of [DineLink](https://dinelink.org) · Software Engineer at [Activ
 ## Latest merged pull requests
 
 <!-- RECENT_PRS:START -->
-- [feat(google-my-business): ui improvement](https://github.com/activepieces/activepieces/pull/16062) <sub>activepieces · Oct 3</sub>
-- [feat(stripe): ui improvement](https://github.com/activepieces/activepieces/pull/16063) <sub>activepieces · Oct 3</sub>
-- [feat(apitable): ui improvement](https://github.com/activepieces/activepieces/pull/16061) <sub>activepieces · Oct 3</sub>
-- [feat(perplexity-ai): ui improvement](https://github.com/activepieces/activepieces/pull/16060) <sub>activepieces · Oct 3</sub>
-- [feat(linear): ui improvement](https://github.com/activepieces/activepieces/pull/16052) <sub>activepieces · Oct 3</sub>
-- [feat(ai): ui improvement](https://github.com/activepieces/activepieces/pull/16032) <sub>activepieces · Oct 3</sub>
+- [feat(attack): unauth-route check](https://github.com/Talaljaber/Vibesafe/pull/146) <sub>Vibesafe · Oct 30</sub>
+- [feat(attack): idor check](https://github.com/Talaljaber/Vibesafe/pull/147) <sub>Vibesafe · Oct 30</sub>
+- [feat(attack): HTML report with precision ledger](https://github.com/Talaljaber/Vibesafe/pull/140) <sub>Vibesafe · Oct 30</sub>
+- [feat(attack): agent markdown report, terminal summary and curl lines](https://github.com/Talaljaber/Vibesafe/pull/143) <sub>Vibesafe · Oct 30</sub>
+- [feat(attack): sessions and attack.json loaders](https://github.com/Talaljaber/Vibesafe/pull/144) <sub>Vibesafe · Oct 30</sub>
+- [feat(attack): stable ids, persistence, baseline protection and retest diff](https://github.com/Talaljaber/Vibesafe/pull/139) <sub>Vibesafe · Oct 30</sub>
 <!-- RECENT_PRS:END -->
 
 ## GitHub activity
