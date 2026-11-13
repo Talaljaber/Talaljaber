@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="220" viewBox="0 0 880 220" role="img" aria-labelledby="t d">
+<title id="t">Talal Jaber, Software Engineer and AI Engineer</title>
+<desc id="d">building AI actions and integrations at Activepieces. founder &amp; CTO of DineLink · AI ordering for restaurants. maintaining VibeSafe · a safety scanner for AI-built apps. taking products from first interview to production.</desc>
+<style>
+text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;fill:#1f2328}
+.k{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;font-size:12px;font-weight:600;letter-spacing:2px;fill:#2a78d6}
+.name{font-size:42px;font-weight:700;letter-spacing:-.5px}
+.f{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;font-size:14.5px}
+.a{fill:#2a78d6;font-weight:700}
+.m{fill:#59636e;font-size:13px}
+.n{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;font-size:12px;fill:#1f2328}
+.cap{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;font-size:11px;fill:#59636e}
+.edge{fill:none;stroke:#59636e;stroke-opacity:.7;stroke-width:1.5;stroke-dasharray:3 5;animation:flow 1s linear infinite}
+.r{opacity:0;animation:cycle 16s ease-in-out infinite both}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.in{animation:rise .6s ease-out both}
+.gy,.gx{transform-box:fill-box;animation:growY .9s cubic-bezier(.2,.8,.2,1) both}
+.gy{transform-origin:50% 100%}
+.gx{transform-origin:0 50%;animation-name:growX}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@keyframes flow{to{stroke-dashoffset:-16}}
+@keyframes cycle{0%{opacity:0;transform:translateY(6px)}2.5%{opacity:1;transform:none}21.25%{opacity:1;transform:none}25%{opacity:0;transform:translateY(-6px)}100%{opacity:0}}
+@keyframes pulse{0%,100%{stroke-opacity:.15}50%{stroke-opacity:.7}}
+@media (prefers-reduced-motion:reduce){.r0{opacity:1}.dots{display:none}}
+</style>
+<defs>
+  <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#d0d7de"/></pattern>
+  <linearGradient id="fade" x1="0" x2="1"><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>
+  <mask id="m"><rect width="880" height="220" fill="url(#fade)"/></mask>
+  <radialGradient id="glow" cx="708" cy="110" r="220" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2a78d6" stop-opacity=".14"/><stop offset="1" stop-color="#2a78d6" stop-opacity="0"/></radialGradient>
+  <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L8,4L0,8Z" fill="#59636e"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="879" height="219" rx="6" fill="#ffffff" stroke="#d0d7de"/>
+<rect x="1" y="1" width="878" height="218" rx="6" fill="url(#grid)" mask="url(#m)"/>
+<rect x="1" y="1" width="878" height="218" rx="6" fill="url(#glow)"/>
+
+<text x="24" y="58" class="k in">SOFTWARE ENGINEER · AI ENGINEER</text>
+<text x="24" y="108" class="name in" style="animation-delay:120ms">Talal Jaber</text>
+<text x="24" y="148" class="f r r0" style="animation-delay:0ms"><tspan class="a">›</tspan> building AI actions and integrations at Activepieces</text>
+<text x="24" y="148" class="f r r1" style="animation-delay:4000ms"><tspan class="a">›</tspan> founder &amp; CTO of DineLink · AI ordering for restaurants</text>
+<text x="24" y="148" class="f r r2" style="animation-delay:8000ms"><tspan class="a">›</tspan> maintaining VibeSafe · a safety scanner for AI-built apps</text>
+<text x="24" y="148" class="f r r3" style="animation-delay:12000ms"><tspan class="a">›</tspan> taking products from first interview to production</text>
+<text x="24" y="188" class="m in" style="animation-delay:300ms">Amman, Jordan · Computer Engineering, GJU</text>
+
+<path class="edge" d="M628,74 H672" marker-end="url(#arrow)"/>
+<path class="edge" d="M742,74 H786" marker-end="url(#arrow)"/>
+<path class="edge" d="M696,90 V138" marker-end="url(#arrow)"/>
+<path class="edge" d="M720,140 V92" marker-end="url(#arrow)"/>
+<text x="732" y="120" class="cap">agent loop</text>
+<g class="dots">
+  <circle r="3.5" fill="#2a78d6"><animateMotion dur="5s" repeatCount="indefinite" path="M594,74 H696 V156 H720 V74 H822"/></circle>
+  <circle r="3.5" fill="#2a78d6" opacity=".6"><animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="M594,74 H696 V156 H720 V74 H822"/></circle>
+</g>
+<g class=""><rect x="560" y="58" width="68" height="32" rx="6" fill="#ffffff" stroke="#d0d7de"/><text x="594" y="78" class="n" text-anchor="middle">input</text></g>
+<rect class="pulse" x="670" y="54" width="76" height="40" rx="9" fill="none" stroke="#2a78d6" stroke-width="2"/>
+<g class="hl"><rect x="674" y="58" width="68" height="32" rx="6" fill="#ffffff" stroke="#2a78d6"/><text x="708" y="78" class="n" text-anchor="middle">model</text></g>
+<g class=""><rect x="788" y="58" width="68" height="32" rx="6" fill="#ffffff" stroke="#d0d7de"/><text x="822" y="78" class="n" text-anchor="middle">output</text></g>
+<g class=""><rect x="674" y="140" width="68" height="32" rx="6" fill="#ffffff" stroke="#d0d7de"/><text x="708" y="160" class="n" text-anchor="middle">tools</text></g>
+</svg>

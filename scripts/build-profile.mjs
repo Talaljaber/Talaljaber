@@ -38,9 +38,6 @@ async function fetchProfile() {
             weeks { contributionDays { date contributionCount } }
           }
         }
-        repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false) {
-          nodes { languages(first: 10, orderBy: { field: SIZE, direction: DESC }) { edges { size node { name } } } }
-        }
       }
     }`,
     { login: USER },
@@ -101,21 +98,6 @@ function monthly(days) {
   return [...months.entries()].slice(-12).map(([key, total]) => ({ key, total }));
 }
 
-function languages(repos) {
-  const bytes = new Map();
-  for (const repo of repos) {
-    for (const { size, node } of repo.languages.edges) {
-      bytes.set(node.name, (bytes.get(node.name) || 0) + size);
-    }
-  }
-  const sum = [...bytes.values()].reduce((a, b) => a + b, 0);
-  const sorted = [...bytes.entries()].sort((a, b) => b[1] - a[1]);
-  const top = sorted.slice(0, 5).map(([name, size]) => ({ name, share: size / sum }));
-  const rest = sorted.slice(5).reduce((a, [, size]) => a + size, 0);
-  if (rest > 0) top.push({ name: "Other", share: rest / sum, other: true });
-  return top;
-}
-
 function byRepository(prs) {
   const repos = new Map();
   for (const pr of prs) {
@@ -156,13 +138,28 @@ const THEMES = {
 const FONT = `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif`;
 const W = 880;
 
+const MONO = `ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
+
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const fmt = (n) => n.toLocaleString("en-US");
+const delay = (ms) => ` style="animation-delay:${Math.round(ms)}ms"`;
+
+// Entrance motion shared by every card: text rises in, bars grow from their axis.
+// Browsers run CSS animations inside SVGs shown as <img>, which is how GitHub renders them.
+const MOTION = `@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.in{animation:rise .6s ease-out both}
+.gy,.gx{transform-box:fill-box;animation:growY .9s cubic-bezier(.2,.8,.2,1) both}
+.gy{transform-origin:50% 100%}
+.gx{transform-origin:0 50%;animation-name:growX}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
 
 function card(t, height, title, body, desc) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${height}" viewBox="0 0 ${W} ${height}" role="img" aria-labelledby="t d">
 <title id="t">${esc(title)}</title><desc id="d">${esc(desc)}</desc>
-<style>text{font-family:${FONT};fill:${t.text}}.m{fill:${t.muted}}.h{font-size:15px;font-weight:600}.s{font-size:12px}.v{font-size:28px;font-weight:600}</style>
+<style>text{font-family:${FONT};fill:${t.text}}.m{fill:${t.muted}}.h{font-size:15px;font-weight:600}.s{font-size:12px}.v{font-size:28px;font-weight:600}
+${MOTION}</style>
 <rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="6" fill="${t.surface}" stroke="${t.border}"/>
 <text x="24" y="36" class="h">${esc(title)}</text>
 ${body}
@@ -170,17 +167,96 @@ ${body}
 }
 
 // Bar with a 4px rounded data-end and a square base, so it reads as anchored to the axis.
-function vbar(x, yBase, w, h, fill) {
+function vbar(x, yBase, w, h, fill, ms = 0) {
   if (h <= 0) return "";
   const r = Math.min(4, h, w / 2);
-  return `<path d="M${x},${yBase}V${yBase - h + r}Q${x},${yBase - h} ${x + r},${yBase - h}H${x + w - r}Q${x + w},${yBase - h} ${x + w},${yBase - h + r}V${yBase}Z" fill="${fill}"/>`;
+  return `<path class="gy"${delay(ms)} d="M${x},${yBase}V${yBase - h + r}Q${x},${yBase - h} ${x + r},${yBase - h}H${x + w - r}Q${x + w},${yBase - h} ${x + w},${yBase - h + r}V${yBase}Z" fill="${fill}"/>`;
 }
 
-function hbar(x, y, w, h, fill, roundEnd) {
+function hbar(x, y, w, h, fill, roundEnd, ms = 0) {
   if (w <= 0) return "";
-  if (!roundEnd) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
+  if (!roundEnd) return `<rect class="gx"${delay(ms)} x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
   const r = Math.min(4, w, h / 2);
-  return `<path d="M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z" fill="${fill}"/>`;
+  return `<path class="gx"${delay(ms)} d="M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z" fill="${fill}"/>`;
+}
+
+// Banner at the top of the README: name, role, a rotating line about current work,
+// and a small agent-loop diagram (input -> model <-> tools -> output) with data moving through it.
+const FOCUS = [
+  "building AI actions and integrations at Activepieces",
+  "founder & CTO of DineLink · AI ordering for restaurants",
+  "maintaining VibeSafe · a safety scanner for AI-built apps",
+  "taking products from first interview to production",
+];
+
+function headerSvg(t) {
+  const H = 220;
+  const accent = t.series[0];
+  const cycle = FOCUS.length * 4; // seconds; each line holds for 4s
+  const share = 100 / FOCUS.length;
+
+  // Agent loop geometry: three nodes on one row, tools below the model.
+  const node = (cx, cy, label, cls = "") =>
+    `<g class="${cls}"><rect x="${cx - 34}" y="${cy - 16}" width="68" height="32" rx="6" fill="${t.surface}" stroke="${cls ? accent : t.border}"/>` +
+    `<text x="${cx}" y="${cy + 4}" class="n" text-anchor="middle">${label}</text></g>`;
+  const route = "M594,74 H696 V156 H720 V74 H822";
+
+  const lines = FOCUS.map(
+    (l, i) => `<text x="24" y="148" class="f r r${i}"${delay(i * 4000)}><tspan class="a">›</tspan> ${esc(l)}</text>`,
+  ).join("\n");
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t d">
+<title id="t">Talal Jaber, Software Engineer and AI Engineer</title>
+<desc id="d">${esc(FOCUS.join(". "))}.</desc>
+<style>
+text{font-family:${FONT};fill:${t.text}}
+.k{font-family:${MONO};font-size:12px;font-weight:600;letter-spacing:2px;fill:${accent}}
+.name{font-size:42px;font-weight:700;letter-spacing:-.5px}
+.f{font-family:${MONO};font-size:14.5px}
+.a{fill:${accent};font-weight:700}
+.m{fill:${t.muted};font-size:13px}
+.n{font-family:${MONO};font-size:12px;fill:${t.text}}
+.cap{font-family:${MONO};font-size:11px;fill:${t.muted}}
+.edge{fill:none;stroke:${t.muted};stroke-opacity:.7;stroke-width:1.5;stroke-dasharray:3 5;animation:flow 1s linear infinite}
+.r{opacity:0;animation:cycle ${cycle}s ease-in-out infinite both}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+${MOTION}
+@keyframes flow{to{stroke-dashoffset:-16}}
+@keyframes cycle{0%{opacity:0;transform:translateY(6px)}${share * 0.1}%{opacity:1;transform:none}${share * 0.85}%{opacity:1;transform:none}${share}%{opacity:0;transform:translateY(-6px)}100%{opacity:0}}
+@keyframes pulse{0%,100%{stroke-opacity:.15}50%{stroke-opacity:.7}}
+@media (prefers-reduced-motion:reduce){.r0{opacity:1}.dots{display:none}}
+</style>
+<defs>
+  <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="${t.border}"/></pattern>
+  <linearGradient id="fade" x1="0" x2="1"><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>
+  <mask id="m"><rect width="${W}" height="${H}" fill="url(#fade)"/></mask>
+  <radialGradient id="glow" cx="708" cy="110" r="220" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${accent}" stop-opacity=".14"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient>
+  <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L8,4L0,8Z" fill="${t.muted}"/></marker>
+</defs>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="6" fill="${t.surface}" stroke="${t.border}"/>
+<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="6" fill="url(#grid)" mask="url(#m)"/>
+<rect x="1" y="1" width="${W - 2}" height="${H - 2}" rx="6" fill="url(#glow)"/>
+
+<text x="24" y="58" class="k in">SOFTWARE ENGINEER · AI ENGINEER</text>
+<text x="24" y="108" class="name in"${delay(120)}>Talal Jaber</text>
+${lines}
+<text x="24" y="188" class="m in"${delay(300)}>Amman, Jordan · Computer Engineering, GJU</text>
+
+<path class="edge" d="M628,74 H672" marker-end="url(#arrow)"/>
+<path class="edge" d="M742,74 H786" marker-end="url(#arrow)"/>
+<path class="edge" d="M696,90 V138" marker-end="url(#arrow)"/>
+<path class="edge" d="M720,140 V92" marker-end="url(#arrow)"/>
+<text x="732" y="120" class="cap">agent loop</text>
+<g class="dots">
+  <circle r="3.5" fill="${accent}"><animateMotion dur="5s" repeatCount="indefinite" path="${route}"/></circle>
+  <circle r="3.5" fill="${accent}" opacity=".6"><animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="${route}"/></circle>
+</g>
+${node(594, 74, "input")}
+<rect class="pulse" x="670" y="54" width="76" height="40" rx="9" fill="none" stroke="${accent}" stroke-width="2"/>
+${node(708, 74, "model", "hl")}
+${node(822, 74, "output")}
+${node(708, 156, "tools")}
+</svg>`;
 }
 
 function overviewSvg(t, d) {
@@ -188,12 +264,12 @@ function overviewSvg(t, d) {
     [fmt(d.total), "contributions"],
     [fmt(d.commits), "commits"],
     [fmt(d.merged), "PRs merged"],
-    [`${d.current} days`, "current streak"],
-    [`${d.longest} days`, "longest streak"],
+    [`${d.current} day${d.current === 1 ? "" : "s"}`, "current streak"],
+    [`${d.longest} day${d.longest === 1 ? "" : "s"}`, "longest streak"],
   ];
   const tileW = (W - 48) / tiles.length;
   let body = tiles
-    .map(([v, l], i) => `<text x="${24 + i * tileW}" y="86" class="v">${esc(v)}</text><text x="${24 + i * tileW}" y="108" class="s m">${esc(l)}</text>`)
+    .map(([v, l], i) => `<g class="in"${delay(i * 90)}><text x="${24 + i * tileW}" y="86" class="v">${esc(v)}</text><text x="${24 + i * tileW}" y="108" class="s m">${esc(l)}</text></g>`)
     .join("");
 
   // Monthly contributions: one series, so no legend; the title names it.
@@ -206,12 +282,13 @@ function overviewSvg(t, d) {
   d.months.forEach((m, i) => {
     const cx = left + step * i + step / 2;
     const h = (m.total / max) * (base - top - 18);
-    body += vbar(cx - barW / 2, base, barW, h, t.series[0]);
+    const ms = 400 + i * 60;
+    body += vbar(cx - barW / 2, base, barW, h, t.series[0], ms);
     const label = new Date(`${m.key}-01T00:00:00Z`).toLocaleString("en-US", { month: "short", timeZone: "UTC" });
     const partial = i === d.months.length - 1;
     body += `<text x="${cx}" y="${base + 20}" class="s m" text-anchor="middle">${label}${partial ? "*" : ""}</text>`;
     // Direct labels only where they matter: the big months and the latest one.
-    if (m.total >= max * 0.3 || partial) body += `<text x="${cx}" y="${base - h - 6}" class="s" text-anchor="middle">${fmt(m.total)}</text>`;
+    if (m.total >= max * 0.3 || partial) body += `<text x="${cx}" y="${base - h - 6}" class="s in"${delay(ms + 700)} text-anchor="middle">${fmt(m.total)}</text>`;
   });
   body += `<text x="${right}" y="${base + 44}" class="s m" text-anchor="end">*month to date · includes private contributions · updated ${d.updated}</text>`;
 
@@ -236,42 +313,15 @@ function prsSvg(t, d) {
     const ow = r.open * scale;
     const gap = mw > 0 && ow > 0 ? 2 : 0;
     body += `<text x="24" y="${y + 14}" class="s">${esc(r.name)}</text>`;
-    body += hbar(left, y, mw, 18, cMerged, ow === 0);
-    body += hbar(left + mw + gap, y, Math.max(ow - gap, 0), 18, cOpen, true);
+    const ms = 200 + i * 90;
+    body += hbar(left, y, mw, 18, cMerged, ow === 0, ms);
+    body += hbar(left + mw + gap, y, Math.max(ow - gap, 0), 18, cOpen, true, ms + 500);
     const label = [r.merged && `${r.merged} merged`, r.open && `${r.open} open`].filter(Boolean).join(" · ");
-    body += `<text x="${left + mw + ow + 8}" y="${y + 14}" class="s m">${label}</text>`;
+    body += `<text x="${left + mw + ow + 8}" y="${y + 14}" class="s m in"${delay(ms + 700)}>${label}</text>`;
   });
   const height = top + rows.length * rowH + 14;
   const desc = rows.map((r) => `${r.name}: ${r.merged} merged, ${r.open} open`).join("; ");
   return card(t, height, "Pull requests by repository", body, desc);
-}
-
-function languagesSvg(t, d) {
-  const left = 24, right = W - 24, y = 60, h = 14;
-  const colorOf = (l, i) => (l.other ? t.other : t.series[i]);
-  let x = left;
-  let body = "";
-  const usable = right - left - 2 * (d.langs.length - 1);
-  d.langs.forEach((l, i) => {
-    const w = Math.max(l.share * usable, 2);
-    const first = i === 0, last = i === d.langs.length - 1;
-    const r = 4;
-    // Round only the outer ends of the stacked bar; 2px surface gap between segments.
-    if (first && last) body += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${colorOf(l, i)}"/>`;
-    else if (first) body += `<path d="M${x + w},${y}H${x + r}Q${x},${y} ${x},${y + r}V${y + h - r}Q${x},${y + h} ${x + r},${y + h}H${x + w}Z" fill="${colorOf(l, i)}"/>`;
-    else if (last) body += `<path d="M${x},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h - r}Q${x + w},${y + h} ${x + w - r},${y + h}H${x}Z" fill="${colorOf(l, i)}"/>`;
-    else body += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${colorOf(l, i)}"/>`;
-    x += w + 2;
-  });
-  // Legend doubles as the direct labels: every segment gets its name and share in text.
-  const colW = (right - left) / d.langs.length;
-  d.langs.forEach((l, i) => {
-    const lx = left + i * colW;
-    body += `<rect x="${lx}" y="${y + 34}" width="10" height="10" rx="2" fill="${colorOf(l, i)}"/>`;
-    body += `<text x="${lx + 16}" y="${y + 43}" class="s">${esc(l.name)} <tspan class="m">${(l.share * 100).toFixed(1)}%</tspan></text>`;
-  });
-  const desc = d.langs.map((l) => `${l.name} ${(l.share * 100).toFixed(1)}%`).join(", ");
-  return card(t, 132, "Languages across my public repositories", body, desc);
 }
 
 // ---------------------------------------------------------------- readme
@@ -316,15 +366,14 @@ const data = {
   longest,
   months: monthly(days),
   repos,
-  langs: languages(profile.repositories.nodes),
   updated: new Date().toISOString().slice(0, 10),
 };
 
 mkdirSync(ASSETS, { recursive: true });
 for (const [mode, theme] of Object.entries(THEMES)) {
+  writeFileSync(new URL(`header-${mode}.svg`, ASSETS), headerSvg(theme));
   writeFileSync(new URL(`overview-${mode}.svg`, ASSETS), overviewSvg(theme, data));
   writeFileSync(new URL(`prs-${mode}.svg`, ASSETS), prsSvg(theme, data));
-  writeFileSync(new URL(`languages-${mode}.svg`, ASSETS), languagesSvg(theme, data));
 }
 
 const readmeUrl = new URL("README.md", ROOT);
@@ -337,7 +386,6 @@ writeFileSync(readmeUrl, readme);
 console.log({
   ...data,
   months: data.months.map((m) => `${m.key}:${m.total}`).join(" "),
-  langs: data.langs.map((l) => `${l.name}:${(l.share * 100).toFixed(1)}`).join(" "),
   activepiecesMerged: activepiecesMerged.length,
   activepiecesPieces: scopes(activepiecesMerged).size,
 });
