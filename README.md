@@ -67,12 +67,12 @@ I build production software and the AI systems that run inside it: LLM-powered a
 ## Recent open-source contributions
 
 <!-- RECENT_PRS:START -->
+- [feat(attack): retest ledger calls out fixed & verified, drop npx hint](https://github.com/Talaljaber/Vibesafe/pull/151) <sub>Vibesafe · Nov 15</sub>
+- [test(attack): end-to-end demo flow, booth runbook, pre-warm and smoke scripts](https://github.com/Talaljaber/Vibesafe/pull/150) <sub>Vibesafe · Nov 15</sub>
+- [feat(cli): add vibesafe attack command](https://github.com/Talaljaber/Vibesafe/pull/149) <sub>Vibesafe · Nov 15</sub>
+- [feat(attack): runner, target detection and harness integration](https://github.com/Talaljaber/Vibesafe/pull/148) <sub>Vibesafe · Nov 15</sub>
 - [feat(attack): unauth-route check](https://github.com/Talaljaber/Vibesafe/pull/146) <sub>Vibesafe · Oct 30</sub>
 - [feat(attack): idor check](https://github.com/Talaljaber/Vibesafe/pull/147) <sub>Vibesafe · Oct 30</sub>
-- [feat(attack): HTML report with precision ledger](https://github.com/Talaljaber/Vibesafe/pull/140) <sub>Vibesafe · Oct 30</sub>
-- [feat(attack): agent markdown report, terminal summary and curl lines](https://github.com/Talaljaber/Vibesafe/pull/143) <sub>Vibesafe · Oct 30</sub>
-- [feat(attack): sessions and attack.json loaders](https://github.com/Talaljaber/Vibesafe/pull/144) <sub>Vibesafe · Oct 30</sub>
-- [feat(attack): stable ids, persistence, baseline protection and retest diff](https://github.com/Talaljaber/Vibesafe/pull/139) <sub>Vibesafe · Oct 30</sub>
 <!-- RECENT_PRS:END -->
 
 ## Activity
